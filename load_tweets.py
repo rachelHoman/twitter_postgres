@@ -119,8 +119,7 @@ def insert_tweet(connection,tweet):
             (id_users, created_at, updated_at, id_urls, friends_count, listed_count, favourites_count, statuses_count, protected, verified, screen_name, name, location, description) 
             VALUES
             (:id_users, :created_at, :updated_at, :id_urls, :friends_count, :listed_count, :favourites_count, :statuses_count, :protected, :verified, :screen_name, :name, :location, :description)
-            ON CONFLICT DO NOTHING
-            returning id_users
+            ON CONFLICT (id_users) DO NOTHING
             ''')
         res = {
            'id_users':tweet['user']['id'],
@@ -197,7 +196,7 @@ def insert_tweet(connection,tweet):
         # If the id is not in the users table, then you'll need to add it in an "unhydrated" form.
         if tweet.get('in_reply_to_user_id',None) is not None:
             sql=sqlalchemy.sql.text('''
-                INSERT INTO user (id_users)
+                INSERT INTO users (id_users)
                 VALUES (:id_users)
                 ON CONFLICT DO NOTHING
                 ''')
@@ -253,7 +252,7 @@ def insert_tweet(connection,tweet):
                     'id_tweets': tweet['id'],
                     'id_urls': id_urls
                  }
-            connection.execute(ssql, res)
+            connection.execute(sql, res)
 
         ########################################
         # insert into the tweet_mentions table
@@ -313,7 +312,7 @@ def insert_tweet(connection,tweet):
                 ''')
             res = {
                     'id_tweets':tweet['id'],
-                    'tag':tag
+                    'tag':remove_nulls(tag)
                    }
 
             connection.execute(sql, res)
@@ -333,13 +332,14 @@ def insert_tweet(connection,tweet):
         for medium in media:
             id_urls = get_id_urls(medium['media_url'], connection)
             sql=sqlalchemy.sql.text('''
-                INSERT INTO tweet_media (id_tweets, id_urls)
-                VALUES (:id_tweets, :id_urls)
+                INSERT INTO tweet_media (id_tweets, id_urls, type)
+                VALUES (:id_tweets, :id_urls, :type)
                 ON CONFLICT DO NOTHING
                 ''')
             res = {
                     'id_tweets':tweet['id'],
-                    'id_urls':id_urls
+                    'id_urls':id_urls,
+                    'type':remove_nulls(medium['type'])
                    }
 
             connection.execute(sql,res)
