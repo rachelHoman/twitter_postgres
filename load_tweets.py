@@ -212,10 +212,16 @@ def insert_tweet(connection,tweet):
             # HINT:
             # use the ON CONFLICT DO NOTHING syntax
             sql=sqlalchemy.sql.text('''
+                INSERT INTO users (id_users)
+                VALUES (:id_users)
+                ON CONFLICT DO NOTHING
                 ''')
 
             # insert into tweet_mentions
             sql=sqlalchemy.sql.text('''
+                INSERT INTO tweet_mentions (id_tweets, id_users)
+                VALUES (:id_tweets, :id_users)
+                ON CONFLICT DO NOTHING
                 ''')
 
         ########################################
@@ -233,6 +239,9 @@ def insert_tweet(connection,tweet):
 
         for tag in tags:
             sql=sqlalchemy.sql.text('''
+                INSERT INTO tweets_tags (id_tweets, tag)
+                VALUES (:id_tweets, :tag)
+                ON CONFLICT DO NOTHING
                 ''')
 
         ########################################
@@ -250,6 +259,9 @@ def insert_tweet(connection,tweet):
         for medium in media:
             id_urls = get_id_urls(medium['media_url'], connection)
             sql=sqlalchemy.sql.text('''
+                INSERT INTO tweet_media (id_tweets, id_urls)
+                VALUES (:id_tweets, :id_urls)
+                ON CONFLICT DO NOTHING
                 ''')
 
 ################################################################################
