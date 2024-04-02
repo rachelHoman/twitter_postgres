@@ -116,9 +116,9 @@ def insert_tweet(connection,tweet):
         # create/update the user
         sql = sqlalchemy.sql.text('''
             INSERT INTO users
-            (id_users, created_at, updated_at, id_urls, friends_count, listed_count, favourites_count, statuses_count, protected, verified, screen_name, name, location, description) 
+                (id_users, created_at, updated_at, screen_name, name, location, id_urls, description, protected, verified, friends_count, listed_count, favourites_count, statuses_count, withheld_in_countries)
             VALUES
-            (:id_users, :created_at, :updated_at, :id_urls, :friends_count, :listed_count, :favourites_count, :statuses_count, :protected, :verified, :screen_name, :name, :location, :description)
+                (:id_users, :created_at, :updated_at, :screen_name, :name, :location, :id_urls, :description, :protected, :verified, :friends_count, :listed_count, :favourites_count, :statuses_count, :withheld_in_countries)
             ON CONFLICT (id_users) DO NOTHING
             ''')
         res = {
@@ -200,8 +200,8 @@ def insert_tweet(connection,tweet):
                 VALUES (:id_users)
                 ON CONFLICT DO NOTHING
                 ''')
-        res = {'id_users': tweet.get('in_reply_to_user_id')}
-        connection.execute(sql, res)
+            res = {'id_users': tweet.get('in_reply_to_user_id')}
+            connection.execute(sql, res)
 
         # insert the tweet
         sql=sqlalchemy.sql.text(f'''
@@ -221,12 +221,12 @@ def insert_tweet(connection,tweet):
             'favorite_count':tweet.get('favorite_count', None),
             'withheld_copyright':tweet.get('withheld_copyright', None),
             'withheld_in_countries':tweet.get('withheld_in_countries', None),
-            'place_name':remove_nulls(place_name),
+            'source':remove_nulls(tweet.get('source',None)),
+            'text':remove_nulls(text),
             'country_code':remove_nulls(country_code),
             'state_code':remove_nulls(state_code),
             'lang':remove_nulls(tweet.get('lang', None)),
-            'text':remove_nulls(text),
-            'source':remove_nulls(tweet.get('source', None)),
+            'place_name':remove_nulls(place_name),
             'geo':None
             }
         connection.execute(sql, res)
