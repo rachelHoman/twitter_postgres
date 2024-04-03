@@ -306,7 +306,7 @@ def insert_tweet(connection,tweet):
 
         for tag in tags:
             sql=sqlalchemy.sql.text('''
-                INSERT INTO tweets_tags (id_tweets, tag)
+                INSERT INTO tweet_tags (id_tweets, tag)
                 VALUES (:id_tweets, :tag)
                 ON CONFLICT DO NOTHING
                 ''')
